@@ -329,9 +329,16 @@ void PowerCap::get_power_cap_limit()
 {
     std::string settingManager = getService(bus, POWER_PATH.c_str() , POWER_INTERFACE);
 
-    AppliedPowerCapData = getProperty<uint32_t>(bus, settingManager.c_str(),
-                                           POWER_PATH.c_str(),
-                                           POWER_INTERFACE, POWER_CAP_STR) ;
+    try
+    {
+        AppliedPowerCapData = getProperty<uint32_t>(bus, settingManager.c_str(),
+                                               POWER_PATH.c_str(),
+                                               POWER_INTERFACE, POWER_CAP_STR) ;
+    }
+    catch (const sdbusplus::exception::SdBusError& ex)
+    {
+        sd_journal_print(LOG_ERR, "sdbus error \n");
+    }
 }
 
 bool PowerCap::get_power_cap_enabled_setting()
@@ -369,6 +376,7 @@ T PowerCap::getProperty(sdbusplus::bus::bus& bus, const char* service, const cha
     catch (const sdbusplus::exception::SdBusError& ex)
     {
         sd_journal_print(LOG_ERR, "GetProperty call failed \n");
+        throw;
     }
 }
 
